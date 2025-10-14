@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace FlappyECS
 {
-    public class ScoreSystem : ISystem, IQueryDebugInfo
+    public class ScoreIecsSystem : IECSSystem, IQueryDebugInfo
     {
         private World world;
         private Query<ScoreTag> query;
         public static System.Action<int> OnScoreChanged;
 
-        public ScoreSystem(World world)
+        public ScoreIecsSystem(World world)
         {
             this.world = world;
             query = new Query<ScoreTag>(this.world);

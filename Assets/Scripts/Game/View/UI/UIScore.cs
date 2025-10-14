@@ -9,12 +9,12 @@ namespace FlappyECS
 
         private void Start()
         {
-            ScoreSystem.OnScoreChanged += UpdateScore;
+            ScoreIecsSystem.OnScoreChanged += UpdateScore;
         }
 
         private void OnDestroy()
         {
-            ScoreSystem.OnScoreChanged -= UpdateScore;
+            ScoreIecsSystem.OnScoreChanged -= UpdateScore;
         }
 
         private void UpdateScore(int score)

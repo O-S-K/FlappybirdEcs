@@ -6,14 +6,19 @@ using Object = UnityEngine.Object;
 
 namespace FlappyECS
 {
-    public class PipeDestroySystem : ISystem, IQueryDebugInfo
+    public class PipeDestroyIecsSystem : IECSSystem, IQueryDebugInfo
     {
+        private Query<Position, PipeTag, RenderObject> query;
+        private List<Entity> toRemove = new List<Entity>();
+        
+        public void OnCreate(World world)
+        {
+            query = new Query<Position, PipeTag, RenderObject>(world);
+        }
         
         public void OnUpdate(World world, float deltaTime)
         {
-            var query = new Query<Position, PipeTag, RenderObject>(world);
-            var toRemove = new List<Entity>();
-
+             toRemove = new List<Entity>();
             query.ForEach((Entity entity, ref Position pos, ref PipeTag tag, ref RenderObject render) =>
             {
                 if (pos.value.x < Const.LEFT_BOUNDARY)

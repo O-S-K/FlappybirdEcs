@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using BlitzEcs;
+using Object = UnityEngine.Object;
 
 namespace FlappyECS
 {
@@ -18,6 +20,11 @@ namespace FlappyECS
 
         private World world;
 
+        private void Awake()
+        {
+            Application.targetFrameRate = 60;
+        }
+
         private void Start()
         {
             // Tạo world ECS
@@ -26,22 +33,22 @@ namespace FlappyECS
             // create and add systems
             world.Systems = new EcsSystem(world);
             
-            ISystem[] entitySystems = {
-                new BirdSystem(),
-                new PipeSystem(this, world),
+            IECSSystem[] entitySystems = {
+                new BirdIecsSystem(),
+                new PipeIecsSystem(this, world),
             };
             
-            ISystem[] renderSystems = {
-                new RenderSystem(),
-                new ParallaxSystem()
+            IECSSystem[] renderSystems = {
+                new RenderIecsSystem(),
+                new ParallaxIecsSystem()
             };
             
-            ISystem[] logicSystems = {
-                new ScoreSystem(world),
-                new CollisionSystem(),
-                new PipeMovementSystem(),
-                new PipeDestroySystem(),
-                new CameraShakeSystem(),
+            IECSSystem[] logicSystems = {
+                new ScoreIecsSystem(world),
+                new CollisionIecsSystem(),
+                new PipeMovementIecsSystem(),
+                new PipeDestroyIecsSystem(),
+                new CameraShakeIecsSystem(),
             };
             
             world.Systems.AddRange(new []

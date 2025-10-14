@@ -4,12 +4,20 @@ using BlitzEcs;
  
 namespace FlappyECS
 {
-    public class ParallaxSystem : ISystem, IQueryDebugInfo
+    public class ParallaxIecsSystem : IECSSystem, IQueryDebugInfo
     {
+        private Query<Position, RenderObject, ParallaxTag> query;
+
+        public void OnCreate(World world)
+        {
+            query = new Query<Position, RenderObject, ParallaxTag>(world);
+        }
+
         public void OnUpdate(World world, float deltaTime)
         {
-            var query = new Query<Position, RenderObject, ParallaxTag>(world);
-
+            if(GameManager.Instance.CurrentState != GameState.Playing)
+                return;
+            
             query.ForEach((ref Position pos, ref RenderObject render, ref ParallaxTag para) =>
             {
                 if (render.gameObject == null)

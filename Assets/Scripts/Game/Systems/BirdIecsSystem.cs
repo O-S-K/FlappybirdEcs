@@ -5,14 +5,19 @@ using UnityEngine;
 
 namespace FlappyECS
 {
-    public class BirdSystem : ISystem, IQueryDebugInfo
+    public class BirdIecsSystem : IECSSystem, IQueryDebugInfo
     {
+        private Query<Position, Rotation, Velocity, Gravity, BirdTag> query;
+        public void OnCreate(World world)
+        {
+            query = new Query<Position, Rotation, Velocity, Gravity, BirdTag>(world);
+        }
+
         public void OnUpdate(World world, float deltaTime)
         {
             if(GameManager.Instance.CurrentState != GameState.Playing) 
                 return;
             
-            var query = new Query<Position, Rotation, Velocity, Gravity, BirdTag>(world);
             query.ForEach((ref Position position,ref Rotation rotation, ref Velocity velocity, ref Gravity gravity, ref BirdTag birdTag) =>
             {
                 if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))

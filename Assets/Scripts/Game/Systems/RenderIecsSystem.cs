@@ -4,11 +4,15 @@ using BlitzEcs;
 
 namespace FlappyECS
 {
-    public class RenderSystem : ISystem , IQueryDebugInfo
+    public class RenderIecsSystem : IECSSystem , IQueryDebugInfo
     {
+        private Query<RenderObject, Position, Rotation> query;
+        public void OnCreate(World world)
+        {
+            query = new Query<RenderObject, Position, Rotation>(world);
+        }
         public void OnUpdate(World world, float deltaTime)
         {
-            var query = new Query<RenderObject, Position, Rotation>(world);
             query.ForEach(( ref RenderObject render, ref Position pos, ref Rotation rot) =>
             {
                 if (render.gameObject)

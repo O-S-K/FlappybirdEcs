@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 namespace FlappyECS
 {
-    public class PipeSystem : ISystem, IQueryDebugInfo
+    public class PipeIecsSystem : IECSSystem, IQueryDebugInfo
     {
         private int nextPairId = 0;
         public float spawnTimer = 0f; // bộ đếm thời gian spawn
@@ -14,7 +14,7 @@ namespace FlappyECS
         private GameEntry gameEntry;
         private World world;
 
-        public PipeSystem(GameEntry gameEntry, World world)
+        public PipeIecsSystem(GameEntry gameEntry, World world)
         {
             this.world = world;
             this.gameEntry = gameEntry;
@@ -25,13 +25,7 @@ namespace FlappyECS
             if (GameManager.Instance.CurrentState != GameState.Playing)
                 return;
 
-#if UNITY_EDITOR
-            BlitzEcs.EcsProfiler.Begin(this);
             CheckAndSpawn(deltaTime);
-            BlitzEcs.EcsProfiler.End(this);
-#else
-            CheckAndSpawn(deltaTime);
-#endif
         }
 
         private void CheckAndSpawn(float deltaTime)

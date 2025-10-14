@@ -5,20 +5,27 @@ using UnityEngine;
 
 namespace FlappyECS
 {
-    public class PipeMovementSystem : ISystem, IQueryDebugInfo
+    public class PipeMovementIecsSystem : IECSSystem, IQueryDebugInfo
     {
+        private Query<Position, Velocity, PipeTag> pipeQuery;
+        private Query<Position, Velocity, BirdTag> birdQuery;
+        
+        public void OnCreate(World world)
+        {
+            pipeQuery = new Query<Position, Velocity, PipeTag>(world);
+            birdQuery = new Query<Position, Velocity, BirdTag>(world);
+        }
+        
         public void OnUpdate(World world, float deltaTime)
         {
-            var pipe = new Query<Position, Velocity, PipeTag>(world);
-            pipe.ForEach((ref Position position, ref Velocity velocity, ref PipeTag pipeTag) =>
+            pipeQuery.ForEach((ref Position position, ref Velocity velocity, ref PipeTag pipeTag) =>
             {
                 if(GameManager.Instance.CurrentState != GameState.Playing) 
                     return;
                 position.value += velocity.value * deltaTime;  
             });
             
-            var bird = new Query<Position, Velocity, BirdTag>(world);
-            bird.ForEach((ref Position position, ref Velocity velocity, ref BirdTag birdTag) =>
+            birdQuery.ForEach((ref Position position, ref Velocity velocity, ref BirdTag birdTag) =>
             {
                 if(GameManager.Instance.CurrentState == GameState.Start)
                 {

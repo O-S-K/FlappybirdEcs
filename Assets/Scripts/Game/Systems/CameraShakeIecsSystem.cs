@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FlappyECS
 {
-    public class CameraShakeSystem : ISystem
+    public class CameraShakeIecsSystem : IECSSystem
     {
         private float duration = 0f;
         private float intensity = 0.1f;

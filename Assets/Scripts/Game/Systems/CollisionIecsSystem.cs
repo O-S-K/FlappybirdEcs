@@ -5,37 +5,35 @@ using UnityEngine;
 
 namespace FlappyECS
 {
-    public class CollisionSystem : ISystem, IQueryDebugInfo
+    public class CollisionIecsSystem : IECSSystem, IQueryDebugInfo
     {
         private HashSet<int> scoredPairs = new HashSet<int>(); // ✅ lưu các cặp đã tính điểm, tránh tính điểm nhiều lần
+        private Query<Position, ColliderRect, BirdTag> birdQuery;
+        private Query<Position, ColliderRect, PipeTag> pipeQuery;
+
+        public void OnCreate(World world)
+        {
+            birdQuery = new Query<Position, ColliderRect, BirdTag>(world);
+            pipeQuery = new Query<Position, ColliderRect, PipeTag>(world);
+        }
 
         public void OnUpdate(World world, float deltaTime)
         {
             if (GameManager.Instance.CurrentState != GameState.Playing)
                 return;
-
-#if UNITY_EDITOR
-            BlitzEcs.EcsProfiler.Begin(this);
             CheckCollisions(world);
-            BlitzEcs.EcsProfiler.End(this);
-#else
-            CheckCollisions(world);
-#endif
         }
 
         private void CheckCollisions(World world)
         {
-            var birdQ = new Query<Position, ColliderRect, BirdTag>(world);
-            var pipeQ = new Query<Position, ColliderRect, PipeTag>(world);
-
-            birdQ.ForEach((ref Position bpos, ref ColliderRect bcol, ref BirdTag birdTag) =>
+            birdQuery.ForEach((ref Position bpos, ref ColliderRect bcol, ref BirdTag birdTag) =>
             {
                 var bMin = bpos.value - bcol.size / 2;
                 var bMax = bpos.value + bcol.size / 2;
                 var birdPos = bpos.value;
 
                 // Kiểm tra va chạm với tất cả các pipe
-                pipeQ.ForEach((ref Position ppos, ref ColliderRect pcol, ref PipeTag pipeTag) =>
+                pipeQuery.ForEach((ref Position ppos, ref ColliderRect pcol, ref PipeTag pipeTag) =>
                 {
                     var pMin = ppos.value - pcol.size / 2;
                     var pMax = ppos.value + pcol.size / 2;
@@ -53,7 +51,7 @@ namespace FlappyECS
                         bMin.y < pMax.y && bMax.y > pMin.y)
                     {
                         AudioManager.Instance.PlayHit();
-                        world.Systems.Get<CameraShakeSystem>().Shake();
+                        world.Systems.Get<CameraShakeIecsSystem>().Shake();
                         GameOver();
                     }
                 });
@@ -72,7 +70,7 @@ namespace FlappyECS
         {
             pipeTag.passed = true;
             scoredPairs.Add(pipeTag.pairId);
-            world.Systems.Get<ScoreSystem>().AddScore(Const.SCORE_PER_PASS);
+            world.Systems.Get<ScoreIecsSystem>().AddScore(Const.SCORE_PER_PASS);
         }
 
         private void GameOver()
