@@ -14,6 +14,8 @@ namespace FlappyECS
         public AudioClip dieClip;
         public AudioClip scoreClip;
         public AudioClip buttonClip;
+        public AudioClip powerUpClip;
+        public AudioClip itemClip;
         
 
         private void Awake()
@@ -32,6 +34,8 @@ namespace FlappyECS
         public void PlayHit() => PlaySFX(hitClip);
         public void PlayScore() => PlaySFX(scoreClip);
         public void PlayButton() => PlaySFX(buttonClip);
+        public void PlayPowerUp() => PlaySFX(powerUpClip);
+        public void PlayItem() => PlaySFX(itemClip);
 
         public void PlayBGM(bool play)
         {

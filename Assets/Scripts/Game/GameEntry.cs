@@ -17,12 +17,13 @@ namespace FlappyECS
         public GameObject cloudPrefab;
         public GameObject hillPrefab;
         public GameObject bgPrefab;
+        public GameObject itemPrefab; // Prefab cho vật phẩm (Ngôi sao)
 
         private World world;
 
         private void Awake()
         {
-            Application.targetFrameRate = 60;
+            Application.targetFrameRate = 9999;
         }
 
         private void Start()
@@ -34,100 +35,71 @@ namespace FlappyECS
             world.Systems = new EcsSystem(world);
             
             IECSSystem[] entitySystems = {
+                new InputIecsSystem(), // Thêm Input System vào đầu
                 new BirdIecsSystem(),
                 new PipeIecsSystem(this, world),
+                new ItemIecsSystem(), // Hệ thống vật phẩm
             };
             
             IECSSystem[] renderSystems = {
                 new RenderIecsSystem(),
+                new FloatingTextIecsSystem(), // Hệ thống text bay
                 new ParallaxIecsSystem()
             };
             
             IECSSystem[] logicSystems = {
                 new ScoreIecsSystem(world),
                 new CollisionIecsSystem(),
-                new PipeMovementIecsSystem(),
-                new PipeDestroyIecsSystem(),
+                new ScrollingIecsSystem(),
+                new CleanupIecsSystem(),
                 new CameraShakeIecsSystem(),
+                new ObstacleIecsSystem(), // Xử lý Cưa, Laze...
+                new BuffIecsSystem(), // Quản lý Buff/Debuff
+                new MagnetIecsSystem(), // Hệ thống nam châm hút vật phẩm
+                new SoundIecsSystem(), // Xử lý âm thanh qua Component
+            };
+
+            IECSSystem[] infraSystems = {
+                new LifecycleIecsSystem(), // Luôn nằm cuối để dọn dẹp thực thể
             };
             
             world.Systems.AddRange(new []
             {
-                entitySystems, renderSystems, logicSystems
+                entitySystems, renderSystems, logicSystems, infraSystems
             }.SelectMany(x => x)).OnCreate();
-            
+ 
             Debug.Log($"Total Systems: {world.Systems.Systems.Count}");
             
-            // create initial entities
-            CreateBird(new Vector2(-2, 0));
-            CreateGround(new Vector2(0, -10));
-            CreateBGParallax();
+            // create initial entities using Factory API
+            EntityFactory.CreateBird(world, birdPrefab, new Vector2(-2, 0));
+            
+            // Create Ground (Manual or add to factory)
+            Entity ground = world.Spawn();
+            ground.Add(new Position { value = new Vector2(0, -10) })
+                  .Add(new Rotation { value = 0f })
+                  .Add(new RenderObject { gameObject = Instantiate(groundPrefab) })
+                  .Add(new ColliderRect { size = new Vector2(20f, 1f) })
+                  .Add(new GameStateComponent { value = GameState.Start })
+                  .Add(new GameConfigComponent { gameSpeed = GameData.GameSpeed });
+
+            EntityFactory.CreateParallax(world, bgPrefab, 1f, 30f, -30f);
+            EntityFactory.CreateParallax(world, cloudPrefab, 1.5f, 15f, -15f);
+            EntityFactory.CreateParallax(world, hillPrefab, 3f, 20f, -20f);
+
+            // Link GameManager with ECS World
+            GameManager.Instance.Init(world);
             
 #if UNITY_EDITOR
             BlitzEcs.Editor.EcsDebuggerWindow.Open();
             BlitzEcs.Editor.EcsDebuggerWindow.Instance.Attach(world, world.Systems);
 #endif
             Debug.Log("Game Started");
+            gameObject.AddComponent<UIAutoSetup>();
         }
-        
-        private Entity CreateBird(Vector2 position)
-        {
-            Entity bird = world.Spawn();
-            bird.Add(new Position { value = position });
-            bird.Add(new Rotation { value = 0f });
-            bird.Add(new Velocity { value = Vector2.zero });
-            bird.Add(new Gravity { value = -9.8f });
-            bird.Add(new RenderObject { gameObject = Object.Instantiate(birdPrefab) });
-            bird.Add(new ColliderRect { size = new Vector2(1f, 1f) });
-            bird.Add(new BirdTag());
-            bird.Add(new ScoreTag { value = 0 });
-            return bird;
-        }
-        private Entity CreateGround(Vector2 position)
-        {
-            Entity ground = world.Spawn();
-            ground.Add(new Position { value = position });
-            ground.Add(new RenderObject { gameObject = Object.Instantiate(groundPrefab) });
-            ground.Add(new ColliderRect { size = new Vector2(20f, 1f) });
-            return ground;
-        }
-        public Entity CreatePipe(Vector2 position, int nextPairId)
-        {
-            Entity pipe = world.Spawn();
-            pipe.Add(new Position { value = position });
-            pipe.Add(new Rotation { value = 0f });
-            pipe.Add(new Velocity { value = new Vector2(-2f, 0) });
-            pipe.Add(new RenderObject { gameObject = Object.Instantiate(pipePrefab) });
-            pipe.Add(new ColliderRect { size = new Vector2(1f, 10f) });
-            pipe.Add(new PipeTag { passed = false, pairId = nextPairId });
-            return pipe;
-        }
-
-        private void CreateBGParallax()
-        {
-            CreateParallax(bgPrefab, speed: 1f, startX: 30f, resetX: -30f);
-            CreateParallax(cloudPrefab, speed: 1.5f, startX: 15f, resetX: -15f);
-            CreateParallax(hillPrefab, speed: 3f, startX: 20f, resetX: -20f);
-
-            void CreateParallax(GameObject prefab, float speed, float startX, float resetX)
-            {
-                Entity bg = world.Spawn();
-
-                var go = Instantiate(prefab);
-                var pos = go.transform.position;
-
-                bg.Add(new Position { value = new Vector2(pos.x, pos.y) })
-                    .Add(new RenderObject { gameObject = go })
-                    .Add(new ParallaxTag { speed = speed, startX = startX, resetX = resetX });
-                Debug.Log($"Created Parallax Entity with speed {speed}");
-            }
-        }
-        
 
         private void Update()
         {
-            float deltaTime = Time.deltaTime * GameData.GameSpeed; 
-            world.Systems.OnUpdate(deltaTime);
+            world.Systems.OnUpdate(Time.deltaTime);
         }
         
         private void OnDestroy()

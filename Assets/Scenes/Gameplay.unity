@@ -1301,6 +1301,8 @@ MonoBehaviour:
   dieClip: {fileID: 8300000, guid: 7351f48ed9d4d8044b44ea01b2edbbf4, type: 3}
   scoreClip: {fileID: 8300000, guid: b4a8a91ea2a2d9849a190cf18fb54e5f, type: 3}
   buttonClip: {fileID: 8300000, guid: 66bcad4b4f9f8a847b9df251596c0499, type: 3}
+  powerUpClip: {fileID: 0}
+  itemClip: {fileID: 0}
 --- !u!4 &958499666
 Transform:
   m_ObjectHideFlags: 0
@@ -1403,6 +1405,7 @@ MonoBehaviour:
   cloudPrefab: {fileID: 255120896235394928, guid: c2b297838e36d914fa44ba1487b5f8d1, type: 3}
   hillPrefab: {fileID: 5167607760457231815, guid: 315e022bca1e8ac499cb11c201e20911, type: 3}
   bgPrefab: {fileID: 7102690048887969308, guid: 05e39b37eb624a643a0408b2a50fd792, type: 3}
+  itemPrefab: {fileID: 7704105949114326162, guid: 32032d30aa0066e4eb86c3698561cece, type: 3}
 --- !u!4 &1411694310
 Transform:
   m_ObjectHideFlags: 0
